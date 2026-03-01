@@ -1,8 +1,6 @@
 name: 'AOC Benchmark Aggregator'
 description: >
-  Reads benchmark JSON files from a folder, merges them with the run history
-  stored in a pages directory, and writes the updated site ready for publishing
-  with peaceiris/actions-gh-pages or similar.
+  Reads benchmark JSON files from a folder, merges them with the run history stored in a pages directory
 
 inputs:
   input-dir:
