@@ -1,0 +1,61 @@
+{
+  "name": "python-aoc-2024",
+  "hash": "deadbeefcafe1234567890abcdef0123456789ab",
+  "timestamp": "2024-12-15T13:00:00Z",
+  "measurements": [
+    {
+      "language": "python",
+      "day": 1,
+      "year": 2024,
+      "part": 1,
+      "duration": "4ms",
+      "iterations": 200,
+      "description": "sorted() zip approach"
+    },
+    {
+      "language": "python",
+      "day": 1,
+      "year": 2024,
+      "part": 2,
+      "duration": "5ms",
+      "iterations": 200,
+      "description": "Counter similarity score"
+    },
+    {
+      "language": "python",
+      "day": 2,
+      "year": 2024,
+      "part": 1,
+      "duration": "9ms",
+      "iterations": 100,
+      "description": "Pairwise diff list comprehension"
+    },
+    {
+      "language": "python",
+      "day": 2,
+      "year": 2024,
+      "part": 2,
+      "duration": "14ms",
+      "iterations": 100,
+      "description": "Brute-force dampener retry"
+    },
+    {
+      "language": "python",
+      "day": 3,
+      "year": 2024,
+      "part": 1,
+      "duration": "7ms",
+      "iterations": 150,
+      "description": "re.findall mul() scan"
+    },
+    {
+      "language": "python",
+      "day": 3,
+      "year": 2024,
+      "part": 2,
+      "duration": "8ms",
+      "iterations": 150,
+      "description": "Stateful do/don't regex scan"
+    }
+  ]
+}

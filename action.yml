@@ -1,0 +1,31 @@
+name: 'AOC Benchmark Aggregator'
+description: >
+  Reads benchmark JSON files from a folder, merges them with the run history
+  stored in a pages directory, and writes the updated site ready for publishing
+  with peaceiris/actions-gh-pages or similar.
+
+inputs:
+  input-dir:
+    description: >
+      Path (relative to the calling repo root) of the directory that contains
+      benchmark JSON files conforming to json_schema.json.
+    required: false
+    default: 'benchmarks'
+  pages-dir:
+    description: >
+      Directory to read the existing data.json from and write the updated
+      data.json + static site files to.  Typically a checkout of your
+      gh-pages branch passed via actions/checkout path:.
+    required: false
+    default: '_pages'
+  max-history:
+    description: >
+      Maximum number of most-recent history entries to keep in data.json.
+      Older entries beyond this limit are dropped.  Set to 0 to keep
+      everything (no pruning).
+    required: false
+    default: '100'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

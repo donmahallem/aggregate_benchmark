@@ -1,0 +1,230 @@
+[
+  {
+    "hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "timestamp": "2024-12-01T10:00:00Z",
+    "measurements": [
+      {
+        "language": "go",
+        "day": 1,
+        "year": 2024,
+        "part": 1,
+        "duration": "510us",
+        "iterations": 1000,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "go",
+        "day": 1,
+        "year": 2024,
+        "part": 2,
+        "duration": "480us",
+        "iterations": 1000,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "go",
+        "day": 2,
+        "year": 2024,
+        "part": 1,
+        "duration": "1ms",
+        "iterations": 500,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "go",
+        "day": 2,
+        "year": 2024,
+        "part": 2,
+        "duration": "2ms",
+        "iterations": 500,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "go",
+        "day": 3,
+        "year": 2024,
+        "part": 1,
+        "duration": "900us",
+        "iterations": 750,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "go",
+        "day": 3,
+        "year": 2024,
+        "part": 2,
+        "duration": "950us",
+        "iterations": 750,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 1,
+        "year": 2024,
+        "part": 1,
+        "duration": "7ms",
+        "iterations": 200,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 1,
+        "year": 2024,
+        "part": 2,
+        "duration": "8ms",
+        "iterations": 200,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 2,
+        "year": 2024,
+        "part": 1,
+        "duration": "15ms",
+        "iterations": 100,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 2,
+        "year": 2024,
+        "part": 2,
+        "duration": "22ms",
+        "iterations": 100,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 3,
+        "year": 2024,
+        "part": 1,
+        "duration": "11ms",
+        "iterations": 150,
+        "description": "Initial implementation"
+      },
+      {
+        "language": "python",
+        "day": 3,
+        "year": 2024,
+        "part": 2,
+        "duration": "13ms",
+        "iterations": 150,
+        "description": "Initial implementation"
+      }
+    ]
+  },
+  {
+    "hash": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b2c3",
+    "timestamp": "2024-12-08T09:30:00Z",
+    "measurements": [
+      {
+        "language": "go",
+        "day": 1,
+        "year": 2024,
+        "part": 1,
+        "duration": "460us",
+        "iterations": 1000,
+        "description": "Optimised sort"
+      },
+      {
+        "language": "go",
+        "day": 1,
+        "year": 2024,
+        "part": 2,
+        "duration": "430us",
+        "iterations": 1000,
+        "description": "Frequency map"
+      },
+      {
+        "language": "go",
+        "day": 2,
+        "year": 2024,
+        "part": 1,
+        "duration": "870us",
+        "iterations": 500,
+        "description": "Micro-optimised loop"
+      },
+      {
+        "language": "go",
+        "day": 2,
+        "year": 2024,
+        "part": 2,
+        "duration": "1ms",
+        "iterations": 500,
+        "description": "Dampener retry"
+      },
+      {
+        "language": "go",
+        "day": 3,
+        "year": 2024,
+        "part": 1,
+        "duration": "700us",
+        "iterations": 750,
+        "description": "Compiled regex"
+      },
+      {
+        "language": "go",
+        "day": 3,
+        "year": 2024,
+        "part": 2,
+        "duration": "720us",
+        "iterations": 750,
+        "description": "Compiled regex + state"
+      },
+      {
+        "language": "python",
+        "day": 1,
+        "year": 2024,
+        "part": 1,
+        "duration": "5ms",
+        "iterations": 200,
+        "description": "Vectorised sort"
+      },
+      {
+        "language": "python",
+        "day": 1,
+        "year": 2024,
+        "part": 2,
+        "duration": "6ms",
+        "iterations": 200,
+        "description": "Counter lookup"
+      },
+      {
+        "language": "python",
+        "day": 2,
+        "year": 2024,
+        "part": 1,
+        "duration": "11ms",
+        "iterations": 100,
+        "description": "List comprehension"
+      },
+      {
+        "language": "python",
+        "day": 2,
+        "year": 2024,
+        "part": 2,
+        "duration": "17ms",
+        "iterations": 100,
+        "description": "Brute-force dampener"
+      },
+      {
+        "language": "python",
+        "day": 3,
+        "year": 2024,
+        "part": 1,
+        "duration": "8ms",
+        "iterations": 150,
+        "description": "re.findall"
+      },
+      {
+        "language": "python",
+        "day": 3,
+        "year": 2024,
+        "part": 2,
+        "duration": "9ms",
+        "iterations": 150,
+        "description": "Stateful scan"
+      }
+    ]
+  }
+]

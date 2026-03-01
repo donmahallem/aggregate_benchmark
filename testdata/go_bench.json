@@ -1,0 +1,61 @@
+{
+  "name": "go-aoc-2024",
+  "hash": "deadbeefcafe1234567890abcdef0123456789ab",
+  "timestamp": "2024-12-15T12:00:00Z",
+  "measurements": [
+    {
+      "language": "go",
+      "day": 1,
+      "year": 2024,
+      "part": 1,
+      "duration": "420us",
+      "iterations": 1000,
+      "description": "Two-pointer sort approach"
+    },
+    {
+      "language": "go",
+      "day": 1,
+      "year": 2024,
+      "part": 2,
+      "duration": "390us",
+      "iterations": 1000,
+      "description": "Frequency-map lookup"
+    },
+    {
+      "language": "go",
+      "day": 2,
+      "year": 2024,
+      "part": 1,
+      "duration": "850us",
+      "iterations": 500,
+      "description": "Sequential difference check"
+    },
+    {
+      "language": "go",
+      "day": 2,
+      "year": 2024,
+      "part": 2,
+      "duration": "1ms",
+      "iterations": 500,
+      "description": "Problem dampener retry"
+    },
+    {
+      "language": "go",
+      "day": 3,
+      "year": 2024,
+      "part": 1,
+      "duration": "600us",
+      "iterations": 750,
+      "description": "Regex mul() scan"
+    },
+    {
+      "language": "go",
+      "day": 3,
+      "year": 2024,
+      "part": 2,
+      "duration": "650us",
+      "iterations": 750,
+      "description": "Stateful do/don't regex scan"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# Ignore everything by default, then whitelist what belongs.
+*
+
+# Directories that contain source (must be unignored before their contents)
+!lib/
+!lib/**/
+!.github/
+!.github/**/
+!testdata/
+!testdata/**/
+!tests/
+!tests/**/
+!static/
+!static/**
+
+# Go source and module files
+!*.go
+!go.mod
+!go.sum
+
+# JSON (schema, testdata, action inputs)
+!*.json
+
+# GitHub Actions and CI
+!*.yml
+
+# Misc
+!*.md
+!*.html
+!*.js
+!*.css
+!*.py
+!Dockerfile
+
+# Generated output that lives in static/ for local --serve convenience;
+# must not be committed or embedded into the binary.
+static/data.json
+
+# This file
+!.gitignore

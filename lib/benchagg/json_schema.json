@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+
+  "properties": {
+    "name": {
+      "description": "Name of the benchmark run, used for labeling results",
+      "type": "string"
+    },
+    "hash": {
+      "description": "commit hash",
+      "type": "string"
+    },
+    "timestamp": {
+      "description": "ISO 8601 formatted timestamp of when the benchmark was run",
+      "type": "string",
+      "format": "date-time"
+    },
+    "measurements": {
+      "description": "List of languages with their benchmark results grouped by year/day/part/run",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Programming language that produced the measurements"
+          },
+          "group_key": {
+            "description": "Optional key describing a logical grouping of runs (e.g. 'sample' vs 'full').",
+            "type": "string"
+          },
+          "duration": {
+            "description": "Measured duration of the benchmark, in Go time.Duration syntax.",
+            "type": "string",
+            "pattern": "^[0-9]+([.][0-9]+)?(ns|us|µs|ms|s|m|h)$",
+            "examples": ["100ns", "5ms", "1s", "2m", "3h"]
+          },
+          "iterations": {
+            "description": "Number of iterations the benchmark performed (optional).",
+            "type": "integer"
+          },
+          "day": {
+            "type": "integer",
+            "description": "Day of the benchmark, used for grouping results"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Year of the benchmark, used for grouping results"
+          },
+          "part": {
+            "type": "integer",
+            "description": "Part of the benchmark, used for grouping results"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the benchmark result"
+          }
+        },
+        "required": ["language", "duration", "day", "year", "part"],
+        "additionalProperties": false
+      }
+    }
+  },
+
+  "required": ["name", "hash", "timestamp", "measurements"],
+  "additionalProperties": false
+}
