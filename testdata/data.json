@@ -1,230 +1,54 @@
-[
-  {
-    "hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
-    "timestamp": "2024-12-01T10:00:00Z",
-    "measurements": [
-      {
-        "language": "go",
-        "day": 1,
-        "year": 2024,
-        "part": 1,
-        "duration": "510us",
-        "iterations": 1000,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "go",
-        "day": 1,
-        "year": 2024,
-        "part": 2,
-        "duration": "480us",
-        "iterations": 1000,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "go",
-        "day": 2,
-        "year": 2024,
-        "part": 1,
-        "duration": "1ms",
-        "iterations": 500,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "go",
-        "day": 2,
-        "year": 2024,
-        "part": 2,
-        "duration": "2ms",
-        "iterations": 500,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "go",
-        "day": 3,
-        "year": 2024,
-        "part": 1,
-        "duration": "900us",
-        "iterations": 750,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "go",
-        "day": 3,
-        "year": 2024,
-        "part": 2,
-        "duration": "950us",
-        "iterations": 750,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 1,
-        "year": 2024,
-        "part": 1,
-        "duration": "7ms",
-        "iterations": 200,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 1,
-        "year": 2024,
-        "part": 2,
-        "duration": "8ms",
-        "iterations": 200,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 2,
-        "year": 2024,
-        "part": 1,
-        "duration": "15ms",
-        "iterations": 100,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 2,
-        "year": 2024,
-        "part": 2,
-        "duration": "22ms",
-        "iterations": 100,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 3,
-        "year": 2024,
-        "part": 1,
-        "duration": "11ms",
-        "iterations": 150,
-        "description": "Initial implementation"
-      },
-      {
-        "language": "python",
-        "day": 3,
-        "year": 2024,
-        "part": 2,
-        "duration": "13ms",
-        "iterations": 150,
-        "description": "Initial implementation"
-      }
-    ]
+{
+  "meta": {
+    "series": {
+      "go": { "label": "Go", "color": "#00ADD8" },
+      "python": { "label": "Python", "color": "#FFD43B" }
+    },
+    "groups": {
+      "2024/day01/part1": { "title": "Day 1 \u00b7 Part 1" },
+      "2024/day01/part2": { "title": "Day 1 \u00b7 Part 2" },
+      "2024/day02/part1": { "title": "Day 2 \u00b7 Part 1" },
+      "2024/day02/part2": { "title": "Day 2 \u00b7 Part 2" },
+      "2024/day03/part1": { "title": "Day 3 \u00b7 Part 1" },
+      "2024/day03/part2": { "title": "Day 3 \u00b7 Part 2" }
+    }
   },
-  {
-    "hash": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b2c3",
-    "timestamp": "2024-12-08T09:30:00Z",
-    "measurements": [
-      {
-        "language": "go",
-        "day": 1,
-        "year": 2024,
-        "part": 1,
-        "duration": "460us",
-        "iterations": 1000,
-        "description": "Optimised sort"
-      },
-      {
-        "language": "go",
-        "day": 1,
-        "year": 2024,
-        "part": 2,
-        "duration": "430us",
-        "iterations": 1000,
-        "description": "Frequency map"
-      },
-      {
-        "language": "go",
-        "day": 2,
-        "year": 2024,
-        "part": 1,
-        "duration": "870us",
-        "iterations": 500,
-        "description": "Micro-optimised loop"
-      },
-      {
-        "language": "go",
-        "day": 2,
-        "year": 2024,
-        "part": 2,
-        "duration": "1ms",
-        "iterations": 500,
-        "description": "Dampener retry"
-      },
-      {
-        "language": "go",
-        "day": 3,
-        "year": 2024,
-        "part": 1,
-        "duration": "700us",
-        "iterations": 750,
-        "description": "Compiled regex"
-      },
-      {
-        "language": "go",
-        "day": 3,
-        "year": 2024,
-        "part": 2,
-        "duration": "720us",
-        "iterations": 750,
-        "description": "Compiled regex + state"
-      },
-      {
-        "language": "python",
-        "day": 1,
-        "year": 2024,
-        "part": 1,
-        "duration": "5ms",
-        "iterations": 200,
-        "description": "Vectorised sort"
-      },
-      {
-        "language": "python",
-        "day": 1,
-        "year": 2024,
-        "part": 2,
-        "duration": "6ms",
-        "iterations": 200,
-        "description": "Counter lookup"
-      },
-      {
-        "language": "python",
-        "day": 2,
-        "year": 2024,
-        "part": 1,
-        "duration": "11ms",
-        "iterations": 100,
-        "description": "List comprehension"
-      },
-      {
-        "language": "python",
-        "day": 2,
-        "year": 2024,
-        "part": 2,
-        "duration": "17ms",
-        "iterations": 100,
-        "description": "Brute-force dampener"
-      },
-      {
-        "language": "python",
-        "day": 3,
-        "year": 2024,
-        "part": 1,
-        "duration": "8ms",
-        "iterations": 150,
-        "description": "re.findall"
-      },
-      {
-        "language": "python",
-        "day": 3,
-        "year": 2024,
-        "part": 2,
-        "duration": "9ms",
-        "iterations": 150,
-        "description": "Stateful scan"
-      }
-    ]
-  }
-]
+  "history": [
+    {
+      "hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "timestamp": "2024-12-01T10:00:00Z",
+      "measurements": [
+        { "series_key": "go", "group_key": "2024/day01/part1", "duration": "510us", "iterations": 1000, "description": "Initial implementation" },
+        { "series_key": "go", "group_key": "2024/day01/part2", "duration": "480us", "iterations": 1000, "description": "Initial implementation" },
+        { "series_key": "go", "group_key": "2024/day02/part1", "duration": "1ms",   "iterations": 500,  "description": "Initial implementation" },
+        { "series_key": "go", "group_key": "2024/day02/part2", "duration": "2ms",   "iterations": 500,  "description": "Initial implementation" },
+        { "series_key": "go", "group_key": "2024/day03/part1", "duration": "900us", "iterations": 750,  "description": "Initial implementation" },
+        { "series_key": "go", "group_key": "2024/day03/part2", "duration": "950us", "iterations": 750,  "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day01/part1", "duration": "7ms",  "iterations": 200, "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day01/part2", "duration": "8ms",  "iterations": 200, "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day02/part1", "duration": "15ms", "iterations": 100, "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day02/part2", "duration": "22ms", "iterations": 100, "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day03/part1", "duration": "11ms", "iterations": 150, "description": "Initial implementation" },
+        { "series_key": "python", "group_key": "2024/day03/part2", "duration": "13ms", "iterations": 150, "description": "Initial implementation" }
+      ]
+    },
+    {
+      "hash": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b2c3",
+      "timestamp": "2024-12-08T09:30:00Z",
+      "measurements": [
+        { "series_key": "go", "group_key": "2024/day01/part1", "duration": "460us", "iterations": 1000, "description": "Optimised sort" },
+        { "series_key": "go", "group_key": "2024/day01/part2", "duration": "430us", "iterations": 1000, "description": "Frequency map" },
+        { "series_key": "go", "group_key": "2024/day02/part1", "duration": "870us", "iterations": 500,  "description": "Micro-optimised loop" },
+        { "series_key": "go", "group_key": "2024/day02/part2", "duration": "1ms",   "iterations": 500,  "description": "Dampener retry" },
+        { "series_key": "go", "group_key": "2024/day03/part1", "duration": "700us", "iterations": 750,  "description": "Compiled regex" },
+        { "series_key": "go", "group_key": "2024/day03/part2", "duration": "720us", "iterations": 750,  "description": "Compiled regex + state" },
+        { "series_key": "python", "group_key": "2024/day01/part1", "duration": "5ms",  "iterations": 200, "description": "Vectorised sort" },
+        { "series_key": "python", "group_key": "2024/day01/part2", "duration": "6ms",  "iterations": 200, "description": "Counter lookup" },
+        { "series_key": "python", "group_key": "2024/day02/part1", "duration": "11ms", "iterations": 100, "description": "List comprehension" },
+        { "series_key": "python", "group_key": "2024/day02/part2", "duration": "17ms", "iterations": 100, "description": "Brute-force dampener" },
+        { "series_key": "python", "group_key": "2024/day03/part1", "duration": "8ms",  "iterations": 150, "description": "re.findall" },
+        { "series_key": "python", "group_key": "2024/day03/part2", "duration": "9ms",  "iterations": 150, "description": "Stateful scan" }
+      ]
+    }
+  ]
+}

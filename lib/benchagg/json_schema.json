@@ -16,48 +16,66 @@
       "type": "string",
       "format": "date-time"
     },
+    "meta": {
+      "description": "Optional display-name mappings. Defined once per file, never repeated per measurement.",
+      "type": "object",
+      "properties": {
+        "series": {
+          "description": "Maps each series_key to its display metadata.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "groups": {
+          "description": "Maps each group_key to its display metadata.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "measurements": {
-      "description": "List of languages with their benchmark results grouped by year/day/part/run",
+      "description": "List of benchmark measurements. Each measurement is identified by group_key (which graph) and series_key (which line).",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "language": {
+          "series_key": {
             "type": "string",
-            "description": "Programming language that produced the measurements"
+            "description": "Stable identifier for this series/line. Must not change once published."
           },
           "group_key": {
-            "description": "Optional key describing a logical grouping of runs (e.g. 'sample' vs 'full').",
-            "type": "string"
+            "type": "string",
+            "description": "Stable identifier that groups measurements into the same graph. Must not change once published."
           },
           "duration": {
-            "description": "Measured duration of the benchmark, in Go time.Duration syntax.",
             "type": "string",
-            "pattern": "^[0-9]+([.][0-9]+)?(ns|us|µs|ms|s|m|h)$",
-            "examples": ["100ns", "5ms", "1s", "2m", "3h"]
+            "description": "Measured duration in Go time.Duration syntax.",
+            "pattern": "^[0-9]+([.][0-9]+)?(ns|us|\u00b5s|ms|s|m|h)$",
+            "examples": ["100ns", "5ms", "1s"]
           },
           "iterations": {
-            "description": "Number of iterations the benchmark performed (optional).",
-            "type": "integer"
-          },
-          "day": {
             "type": "integer",
-            "description": "Day of the benchmark, used for grouping results"
-          },
-          "year": {
-            "type": "integer",
-            "description": "Year of the benchmark, used for grouping results"
-          },
-          "part": {
-            "type": "integer",
-            "description": "Part of the benchmark, used for grouping results"
+            "description": "Number of iterations the benchmark performed (optional)."
           },
           "description": {
             "type": "string",
-            "description": "Optional description of the benchmark result"
+            "description": "Optional free-text annotation shown in tooltips."
           }
         },
-        "required": ["language", "duration", "day", "year", "part"],
+        "required": ["series_key", "group_key", "duration"],
         "additionalProperties": false
       }
     }

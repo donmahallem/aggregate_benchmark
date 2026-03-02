@@ -8,14 +8,12 @@ import (
 	"github.com/donmahallem/aggregate_benchmark/lib/benchagg"
 )
 
-// ── helpers ───────────────────────────────────────────────────────────────────
-
 func entry(hash, ts string, ms []benchagg.Measurement) benchagg.HistoryEntry {
 	return benchagg.HistoryEntry{Hash: hash, Timestamp: ts, Measurements: ms}
 }
 
-func meas(lang string, day, year, part int, dur string) benchagg.Measurement {
-	return benchagg.Measurement{Language: lang, Day: day, Year: year, Part: part, Duration: dur}
+func meas(seriesKey, groupKey, dur string) benchagg.Measurement {
+	return benchagg.Measurement{SeriesKey: seriesKey, GroupKey: groupKey, Duration: dur}
 }
 
 func validDoc() []byte {
@@ -24,7 +22,7 @@ func validDoc() []byte {
 		Hash:      "abc123",
 		Timestamp: "2024-12-01T12:00:00Z",
 		Measurements: []benchagg.Measurement{
-			meas("go", 1, 2024, 1, "500us"),
+			meas("go", "2024/day01/part1", "500us"),
 		},
 	}
 	b, err := json.Marshal(doc)
@@ -34,59 +32,39 @@ func validDoc() []byte {
 	return b
 }
 
-// ── MeasurementKey ────────────────────────────────────────────────────────────
-
 func TestMeasurementKey_SameIdentity(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 1, 2024, 1, "999s") // different duration — same identity
+	a := meas("go", "", "1ms")
+	b := meas("go", "", "999s")
 	if benchagg.MeasurementKey(a) != benchagg.MeasurementKey(b) {
 		t.Error("expected same key when only duration differs")
 	}
 }
 
-func TestMeasurementKey_DifferentLanguage(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("python", 1, 2024, 1, "1ms")
+func TestMeasurementKey_DifferentSeriesKey(t *testing.T) {
+	a := meas("go", "", "1ms")
+	b := meas("python", "", "1ms")
 	if benchagg.MeasurementKey(a) == benchagg.MeasurementKey(b) {
-		t.Error("expected different keys for different languages")
-	}
-}
-
-func TestMeasurementKey_DifferentDay(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 2, 2024, 1, "1ms")
-	if benchagg.MeasurementKey(a) == benchagg.MeasurementKey(b) {
-		t.Error("expected different keys for different days")
-	}
-}
-
-func TestMeasurementKey_DifferentPart(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 1, 2024, 2, "1ms")
-	if benchagg.MeasurementKey(a) == benchagg.MeasurementKey(b) {
-		t.Error("expected different keys for different parts")
+		t.Error("expected different keys for different series_key values")
 	}
 }
 
 func TestMeasurementKey_GroupKeyDistinguishes(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 1, 2024, 1, "1ms")
-	b.GroupKey = "sample"
+	a := meas("go", "", "1ms")
+	b := meas("go", "sample", "1ms")
 	if benchagg.MeasurementKey(a) == benchagg.MeasurementKey(b) {
 		t.Error("expected different keys for different group_key values")
 	}
 }
 
-func TestMeasurementKey_EmptyGroupKeyEquivalent(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 1, 2024, 1, "1ms")
-	b.GroupKey = ""
+func TestMeasurementKey_DescriptionDoesNotAffectKey(t *testing.T) {
+	// description is display-only; changing it must not affect history continuity
+	a := meas("go", "bench", "1ms")
+	b := meas("go", "bench", "1ms")
+	b.Description = "faster variant"
 	if benchagg.MeasurementKey(a) != benchagg.MeasurementKey(b) {
-		t.Error("expected same key when group_key is empty and omitted")
+		t.Error("expected same key when only description differs")
 	}
 }
-
-// ── ValidateAndParse ──────────────────────────────────────────────────────────
 
 func TestValidateAndParse_Valid(t *testing.T) {
 	var doc benchagg.BenchmarkFile
@@ -104,7 +82,7 @@ func TestValidateAndParse_MissingName(t *testing.T) {
 }
 
 func TestValidateAndParse_InvalidDuration(t *testing.T) {
-	raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"language":"go","day":1,"year":2024,"part":1,"duration":"bad"}]}`)
+	raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"series_key":"go","group_key":"my-bench","duration":"bad"}]}`)
 	var doc benchagg.BenchmarkFile
 	if err := benchagg.ValidateAndParse(raw, &doc); err == nil {
 		t.Error("expected error for invalid duration")
@@ -114,7 +92,7 @@ func TestValidateAndParse_InvalidDuration(t *testing.T) {
 func TestValidateAndParse_ValidDurationUnits(t *testing.T) {
 	units := []string{"1ns", "1us", "1µs", "1ms", "1s", "1m", "1h"}
 	for _, u := range units {
-		raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"language":"go","day":1,"year":2024,"part":1,"duration":"` + u + `"}]}`)
+		raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"series_key":"go","group_key":"my-bench","duration":"` + u + `"}]}`)
 		var doc benchagg.BenchmarkFile
 		if err := benchagg.ValidateAndParse(raw, &doc); err != nil {
 			t.Errorf("unit %q should be valid, got: %v", u, err)
@@ -122,11 +100,19 @@ func TestValidateAndParse_ValidDurationUnits(t *testing.T) {
 	}
 }
 
-func TestValidateAndParse_MissingMeasurementDay(t *testing.T) {
-	raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"language":"go","year":2024,"part":1,"duration":"1ms"}]}`)
+func TestValidateAndParse_MissingGroupKey(t *testing.T) {
+	raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"series_key":"go","duration":"1ms"}]}`)
 	var doc benchagg.BenchmarkFile
 	if err := benchagg.ValidateAndParse(raw, &doc); err == nil {
-		t.Error("expected error for missing day")
+		t.Error("expected error for missing group_key")
+	}
+}
+
+func TestValidateAndParse_MissingSeriesKey(t *testing.T) {
+	raw := []byte(`{"name":"x","hash":"abc","timestamp":"2024-01-01T00:00:00Z","measurements":[{"group_key":"my-bench","duration":"1ms"}]}`)
+	var doc benchagg.BenchmarkFile
+	if err := benchagg.ValidateAndParse(raw, &doc); err == nil {
+		t.Error("expected error for missing series_key")
 	}
 }
 
@@ -137,12 +123,10 @@ func TestValidateAndParse_InvalidJSON(t *testing.T) {
 	}
 }
 
-// ── DeduplicateMeasurements ───────────────────────────────────────────────────
-
 func TestDeduplicateMeasurements_UniquePreserved(t *testing.T) {
-	m1 := meas("go", 1, 2024, 1, "1ms")
-	m2 := meas("python", 1, 2024, 1, "5ms")
-	m3 := meas("go", 1, 2024, 2, "2ms")
+	m1 := meas("go", "bench/part1", "1ms")
+	m2 := meas("python", "bench/part1", "5ms")
+	m3 := meas("go", "bench/part2", "2ms")
 	out := benchagg.DeduplicateMeasurements([]benchagg.Measurement{m1, m2, m3})
 	if len(out) != 3 {
 		t.Errorf("expected 3, got %d", len(out))
@@ -150,7 +134,7 @@ func TestDeduplicateMeasurements_UniquePreserved(t *testing.T) {
 }
 
 func TestDeduplicateMeasurements_DuplicateRemoved(t *testing.T) {
-	m := meas("go", 1, 2024, 1, "1ms")
+	m := meas("go", "bench", "1ms")
 	out := benchagg.DeduplicateMeasurements([]benchagg.Measurement{m, m})
 	if len(out) != 1 {
 		t.Errorf("expected 1, got %d", len(out))
@@ -158,8 +142,8 @@ func TestDeduplicateMeasurements_DuplicateRemoved(t *testing.T) {
 }
 
 func TestDeduplicateMeasurements_FirstOccurrenceKept(t *testing.T) {
-	a := meas("go", 1, 2024, 1, "1ms")
-	b := meas("go", 1, 2024, 1, "9s") // same identity, different duration
+	a := meas("go", "bench/part1", "1ms")
+	b := meas("go", "bench/part1", "9s") // same identity, different duration
 	out := benchagg.DeduplicateMeasurements([]benchagg.Measurement{a, b})
 	if len(out) != 1 {
 		t.Fatalf("expected 1 result, got %d", len(out))
@@ -174,8 +158,6 @@ func TestDeduplicateMeasurements_Empty(t *testing.T) {
 		t.Errorf("expected empty, got %d", len(out))
 	}
 }
-
-// ── MergeWithHistory ──────────────────────────────────────────────────────────
 
 func TestMergeWithHistory_AppendNewEntry(t *testing.T) {
 	h := []benchagg.HistoryEntry{
@@ -192,7 +174,7 @@ func TestMergeWithHistory_AppendNewEntry(t *testing.T) {
 }
 
 func TestMergeWithHistory_ReplaceExistingHash(t *testing.T) {
-	orig := entry("aaa", "2024-12-01T10:00:00Z", []benchagg.Measurement{meas("go", 1, 2024, 1, "1ms")})
+	orig := entry("aaa", "2024-12-01T10:00:00Z", []benchagg.Measurement{meas("go", "", "1ms")})
 	h := []benchagg.HistoryEntry{orig, entry("bbb", "2024-12-08T10:00:00Z", nil)}
 
 	rerun := entry("aaa", "2024-12-01T10:00:00Z", nil) // same hash, no measurements
@@ -226,8 +208,6 @@ func TestMergeWithHistory_NilHistory(t *testing.T) {
 		t.Errorf("expected 1, got %d", len(result))
 	}
 }
-
-// ── PruneHistory ──────────────────────────────────────────────────────────────
 
 func makeHistory(n int) []benchagg.HistoryEntry {
 	h := make([]benchagg.HistoryEntry, n)
@@ -295,8 +275,6 @@ func TestPruneHistory_Empty(t *testing.T) {
 		t.Errorf("expected empty, got %d", len(out))
 	}
 }
-
-// ── utility ───────────────────────────────────────────────────────────────────
 
 func hashSlice(h []benchagg.HistoryEntry) []string {
 	s := make([]string, len(h))
