@@ -11,13 +11,10 @@ import (
 )
 
 type Measurement struct {
-	Language    string `json:"language"`
-	GroupKey    string `json:"group_key,omitempty"`
+	SeriesKey   string `json:"series_key"`
+	GroupKey    string `json:"group_key"`
 	Duration    string `json:"duration"`
 	Iterations  int    `json:"iterations,omitempty"`
-	Day         int    `json:"day"`
-	Year        int    `json:"year"`
-	Part        int    `json:"part"`
 	Description string `json:"description,omitempty"`
 }
 
@@ -27,16 +24,62 @@ type HistoryEntry struct {
 	Measurements []Measurement `json:"measurements"`
 }
 
+// SeriesMeta holds display metadata for a single series (a line on a graph).
+type SeriesMeta struct {
+	Label string `json:"label,omitempty"`
+	Color string `json:"color,omitempty"`
+}
+
+// GroupMeta holds display metadata for a single group (a graph card).
+type GroupMeta struct {
+	Title string `json:"title,omitempty"`
+}
+
+// Meta holds all display-name mappings. It is carried at the top level of both
+// input files and the output data.json — never repeated per measurement.
+type Meta struct {
+	Series map[string]SeriesMeta `json:"series,omitempty"`
+	Groups map[string]GroupMeta  `json:"groups,omitempty"`
+}
+
+// OutputData is the shape of the written data.json.
+type OutputData struct {
+	Meta    Meta           `json:"meta"`
+	History []HistoryEntry `json:"history"`
+}
+
+// MergeMeta merges override into base, with override values taking precedence.
+// A new Meta is returned; neither argument is mutated.
+func MergeMeta(base, override Meta) Meta {
+	out := Meta{
+		Series: make(map[string]SeriesMeta),
+		Groups: make(map[string]GroupMeta),
+	}
+	for k, v := range base.Series {
+		out.Series[k] = v
+	}
+	for k, v := range override.Series {
+		out.Series[k] = v
+	}
+	for k, v := range base.Groups {
+		out.Groups[k] = v
+	}
+	for k, v := range override.Groups {
+		out.Groups[k] = v
+	}
+	return out
+}
+
+// MeasurementKey returns a stable identity key based solely on the two stable
+// fields: group_key (which graph) and series_key (which line). Display-only
+// fields (description) are intentionally excluded so they can be changed
+// without affecting deduplication or history continuity.
 func MeasurementKey(m Measurement) string {
 	type identity struct {
-		Language    string `json:"l"`
-		GroupKey    string `json:"g"`
-		Day         int    `json:"d"`
-		Year        int    `json:"y"`
-		Part        int    `json:"p"`
-		Description string `json:"desc"`
+		GroupKey  string `json:"g"`
+		SeriesKey string `json:"s"`
 	}
-	b, _ := json.Marshal(identity{m.Language, m.GroupKey, m.Day, m.Year, m.Part, m.Description})
+	b, _ := json.Marshal(identity{m.GroupKey, m.SeriesKey})
 	return string(b)
 }
 
@@ -75,17 +118,18 @@ func PruneHistory(history []HistoryEntry, max int) []HistoryEntry {
 	return history[len(history)-max:]
 }
 
-func LoadInputFiles(dir string, logf func(format string, args ...any)) ([]Measurement, error) {
+func LoadInputFiles(dir string, logf func(format string, args ...any)) ([]Measurement, Meta, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			logf("warning: input-dir %q does not exist — no measurements loaded", dir)
-			return nil, nil
+			return nil, Meta{}, nil
 		}
-		return nil, fmt.Errorf("readdir %s: %w", dir, err)
+		return nil, Meta{}, fmt.Errorf("readdir %s: %w", dir, err)
 	}
 
 	var all []Measurement
+	merged := Meta{}
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") || e.Name() == "data.json" {
 			continue
@@ -102,27 +146,28 @@ func LoadInputFiles(dir string, logf func(format string, args ...any)) ([]Measur
 			continue
 		}
 		all = append(all, doc.Measurements...)
+		merged = MergeMeta(merged, doc.Meta)
 	}
-	return DeduplicateMeasurements(all), nil
+	return DeduplicateMeasurements(all), merged, nil
 }
 
-func LoadHistory(path string) ([]HistoryEntry, error) {
+func LoadHistory(path string) (OutputData, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, nil
+			return OutputData{}, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", path, err)
+		return OutputData{}, fmt.Errorf("read %s: %w", path, err)
 	}
-	var history []HistoryEntry
-	if err := json.Unmarshal(raw, &history); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", path, err)
+	var data OutputData
+	if err := json.Unmarshal(raw, &data); err != nil {
+		return OutputData{}, fmt.Errorf("parse %s: %w", path, err)
 	}
-	return history, nil
+	return data, nil
 }
 
-func WriteHistory(path string, history []HistoryEntry) error {
-	blob, err := json.MarshalIndent(history, "", "  ")
+func WriteHistory(path string, data OutputData) error {
+	blob, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}

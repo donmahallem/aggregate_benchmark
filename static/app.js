@@ -1,14 +1,6 @@
-const LANG_COLOR = {
-  go: "#00ADD8",
-  python: "#FFD43B",
-  c: "#A8B9CC",
-  cpp: "#F34B7D",
-};
-
-function colorFor(lang) {
-  if (LANG_COLOR[lang]) return LANG_COLOR[lang];
+function colorFor(key) {
   let h = 0;
-  for (let i = 0; i < lang.length; i++) h = (h * 31 + lang.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
   return "#" + (h & 0xffffff).toString(16).padStart(6, "0");
 }
 
@@ -42,31 +34,19 @@ function formatMs(ms) {
   return (ms / 1_000).toFixed(3) + " s";
 }
 
-function measurementKey(m) {
-  const y = String(m.year).padStart(4, "0");
-  const d = String(m.day).padStart(2, "0");
-  const p = String(m.part).padStart(2, "0");
-  return `${y}:${d}:${p}:${m.group_key || ""}`;
-}
-
-function keyTitle(k) {
-  const [y, d, p, g] = k.split(":");
-  const year = parseInt(y) < 100 ? 2000 + parseInt(y) : parseInt(y);
-  let t = `${year}  ·  Day ${parseInt(d)}  ·  Part ${parseInt(p)}`;
-  if (g) t += `  ·  ${g}`;
-  return t;
-}
-
 (async () => {
   const statusEl = document.getElementById("status");
   const gridEl = document.getElementById("grid");
   const metaEl = document.getElementById("meta");
 
   let history;
+  let meta = {};
   try {
     const res = await fetch("./data.json");
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    history = await res.json();
+    const data = await res.json();
+    history = data.history || [];
+    meta = data.meta || {};
   } catch (e) {
     statusEl.textContent = `Could not load data.json — ${e.message}`;
     return;
@@ -90,9 +70,9 @@ function keyTitle(k) {
   const groupMeta = new Map();
   for (const run of history) {
     for (const m of run.measurements || []) {
-      const k = measurementKey(m);
+      const k = m.group_key || "";
       if (!groupMeta.has(k)) groupMeta.set(k, new Set());
-      groupMeta.get(k).add(m.language);
+      groupMeta.get(k).add(m.series_key);
     }
   }
 
@@ -102,15 +82,15 @@ function keyTitle(k) {
   gridEl.style.display = "";
 
   for (const gk of sortedKeys) {
-    const langs = [...groupMeta.get(gk)].sort();
+    const seriesKeys = [...groupMeta.get(gk)].sort();
 
     const series = Object.fromEntries(
-      langs.map((l) => [l, Array(n).fill(null)]),
+      seriesKeys.map((sk) => [sk, Array(n).fill(null)]),
     );
     history.forEach((run, i) => {
       for (const m of run.measurements || []) {
-        if (measurementKey(m) === gk && series[m.language] !== undefined) {
-          series[m.language][i] = durationToMs(m.duration);
+        if ((m.group_key || "") === gk && series[m.series_key] !== undefined) {
+          series[m.series_key][i] = durationToMs(m.duration);
         }
       }
     });
@@ -123,7 +103,7 @@ function keyTitle(k) {
     wrap.className = "chart-wrap";
     const canvas = document.createElement("canvas");
 
-    title.textContent = keyTitle(gk);
+    title.textContent = meta.groups?.[gk]?.title ?? gk;
     wrap.appendChild(canvas);
     card.appendChild(title);
     card.appendChild(wrap);
@@ -133,17 +113,21 @@ function keyTitle(k) {
       type: "line",
       data: {
         labels,
-        datasets: langs.map((lang) => ({
-          label: lang,
-          data: series[lang],
-          borderColor: colorFor(lang),
-          backgroundColor: colorFor(lang) + "28",
-          borderWidth: 2,
-          pointRadius: n <= 30 ? 4 : 2,
-          pointHoverRadius: 6,
-          tension: 0.3,
-          spanGaps: true,
-        })),
+        datasets: seriesKeys.map((sk) => {
+          const sm = meta.series?.[sk] ?? {};
+          const color = sm.color ?? colorFor(sk);
+          return {
+            label: sm.label ?? sk,
+            data: series[sk],
+            borderColor: color,
+            backgroundColor: color + "28",
+            borderWidth: 2,
+            pointRadius: n <= 30 ? 4 : 2,
+            pointHoverRadius: 6,
+            tension: 0.3,
+            spanGaps: true,
+          };
+        }),
       },
       options: {
         responsive: true,

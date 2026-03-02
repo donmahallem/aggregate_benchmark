@@ -2,57 +2,58 @@
   "name": "go-aoc-2024",
   "hash": "deadbeefcafe1234567890abcdef0123456789ab",
   "timestamp": "2024-12-15T12:00:00Z",
+  "meta": {
+    "series": {
+      "go": { "label": "Go", "color": "#00ADD8" }
+    },
+    "groups": {
+      "2024/day01/part1": { "title": "Day 1 \u00b7 Part 1" },
+      "2024/day01/part2": { "title": "Day 1 \u00b7 Part 2" },
+      "2024/day02/part1": { "title": "Day 2 \u00b7 Part 1" },
+      "2024/day02/part2": { "title": "Day 2 \u00b7 Part 2" },
+      "2024/day03/part1": { "title": "Day 3 \u00b7 Part 1" },
+      "2024/day03/part2": { "title": "Day 3 \u00b7 Part 2" }
+    }
+  },
   "measurements": [
     {
-      "language": "go",
-      "day": 1,
-      "year": 2024,
-      "part": 1,
+      "series_key": "go",
+      "group_key": "2024/day01/part1",
       "duration": "420us",
       "iterations": 1000,
       "description": "Two-pointer sort approach"
     },
     {
-      "language": "go",
-      "day": 1,
-      "year": 2024,
-      "part": 2,
+      "series_key": "go",
+      "group_key": "2024/day01/part2",
       "duration": "390us",
       "iterations": 1000,
       "description": "Frequency-map lookup"
     },
     {
-      "language": "go",
-      "day": 2,
-      "year": 2024,
-      "part": 1,
+      "series_key": "go",
+      "group_key": "2024/day02/part1",
       "duration": "850us",
       "iterations": 500,
       "description": "Sequential difference check"
     },
     {
-      "language": "go",
-      "day": 2,
-      "year": 2024,
-      "part": 2,
+      "series_key": "go",
+      "group_key": "2024/day02/part2",
       "duration": "1ms",
       "iterations": 500,
       "description": "Problem dampener retry"
     },
     {
-      "language": "go",
-      "day": 3,
-      "year": 2024,
-      "part": 1,
+      "series_key": "go",
+      "group_key": "2024/day03/part1",
       "duration": "600us",
       "iterations": 750,
       "description": "Regex mul() scan"
     },
     {
-      "language": "go",
-      "day": 3,
-      "year": 2024,
-      "part": 2,
+      "series_key": "go",
+      "group_key": "2024/day03/part2",
       "duration": "650us",
       "iterations": 750,
       "description": "Stateful do/don't regex scan"

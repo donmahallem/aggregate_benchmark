@@ -1,9 +1,9 @@
 """
 Validates data.json produced by the action:
-  - non-empty array
+  - object with "history" key containing a non-empty array
   - expected entry count (seeded + 1)
   - latest entry has the expected hash
-  - latest entry contains measurements for expected languages
+  - latest entry contains measurements for expected series_keys
   - no duplicate measurements in the latest entry
   - entries are sorted chronologically
 
@@ -23,12 +23,8 @@ def fail(msg: str) -> None:
 def measurement_key(m: dict) -> str:
     return json.dumps(
         {
-            "l": m.get("language", ""),
-            "d": m.get("day"),
-            "y": m.get("year"),
-            "p": m.get("part"),
             "g": m.get("group_key", ""),
-            "desc": m.get("description", ""),
+            "s": m.get("series_key", ""),
         },
         sort_keys=True,
     )
@@ -40,13 +36,17 @@ def main(pages_dir: str, expected_hash: str, expected_count: int) -> None:
     with open(path, encoding="utf-8") as fh:
         data = json.load(fh)
 
-    if not isinstance(data, list) or len(data) == 0:
-        fail("data.json is not a non-empty array")
+    if not isinstance(data, dict) or "history" not in data:
+        fail("data.json is not an object with a 'history' key")
 
-    if len(data) != expected_count:
-        fail(f"expected {expected_count} entries, got {len(data)}")
+    history = data["history"]
+    if not isinstance(history, list) or len(history) == 0:
+        fail("data.json history is not a non-empty array")
 
-    latest = data[-1]
+    if len(history) != expected_count:
+        fail(f"expected {expected_count} entries, got {len(history)}")
+
+    latest = history[-1]
 
     if latest.get("hash") != expected_hash:
         fail(f"expected hash {expected_hash!r}, got {latest.get('hash')!r}")
@@ -55,22 +55,22 @@ def main(pages_dir: str, expected_hash: str, expected_count: int) -> None:
     if not measurements:
         fail("latest entry has no measurements")
 
-    langs = sorted({m.get("language") for m in measurements})
+    series_keys = sorted({m.get("series_key") for m in measurements})
     for required in ("go", "python"):
-        if required not in langs:
-            fail(f"expected language {required!r} in latest entry, got {langs}")
+        if required not in series_keys:
+            fail(f"expected series_key {required!r} in latest entry, got {series_keys}")
 
     keys = [measurement_key(m) for m in measurements]
     if len(set(keys)) != len(keys):
         fail(f"duplicate measurements: {len(keys)} total, {len(set(keys))} unique")
 
-    for i in range(1, len(data)):
-        if data[i]["timestamp"] < data[i - 1]["timestamp"]:
+    for i in range(1, len(history)):
+        if history[i]["timestamp"] < history[i - 1]["timestamp"]:
             fail(f"entries out of chronological order at index {i}")
 
     print(
-        f"OK: {len(data)} entries, latest hash={expected_hash!r}, "
-        f"languages={langs}, no duplicates, sorted"
+        f"OK: {len(history)} entries, latest hash={expected_hash!r}, "
+        f"series_keys={series_keys}, no duplicates, sorted"
     )
 
 

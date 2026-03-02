@@ -21,7 +21,7 @@ var staticFiles embed.FS
 func main() {
 	inputDir := flag.String("input-dir", envOr("INPUT_INPUT_DIR", "benchmarks"),
 		"directory containing benchmark JSON files (relative to workspace root)")
-	pagesDir := flag.String("pages-dir", envOr("INPUT_PAGES_DIR", "./static"),
+	pagesDir := flag.String("pages-dir", envOr("INPUT_PAGES_DIR", "./output"),
 		"directory to read/write data.json and static site files")
 	maxHistoryStr := flag.String("max-history", envOr("INPUT_MAX_HISTORY", "100"),
 		"maximum number of history entries to keep (0 = unlimited)")
@@ -44,7 +44,7 @@ func main() {
 
 	hash := envOr("GITHUB_SHA", "unknown")
 
-	measurements, err := benchagg.LoadInputFiles(*inputDir, func(format string, args ...any) {
+	measurements, meta, err := benchagg.LoadInputFiles(*inputDir, func(format string, args ...any) {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
 	})
 	if err != nil {
@@ -53,12 +53,12 @@ func main() {
 	fmt.Fprintf(os.Stderr, "loaded %d measurements from %s\n", len(measurements), *inputDir)
 
 	historyPath := filepath.Join(*pagesDir, "data.json")
-	history, err := benchagg.LoadHistory(historyPath)
+	outputData, err := benchagg.LoadHistory(historyPath)
 	if err != nil {
 		log.Printf("warning: could not load history: %v — starting fresh", err)
-		history = nil
+		outputData = benchagg.OutputData{}
 	}
-	fmt.Fprintf(os.Stderr, "existing history: %d entries\n", len(history))
+	fmt.Fprintf(os.Stderr, "existing history: %d entries\n", len(outputData.History))
 
 	entry := benchagg.HistoryEntry{
 		Hash:         hash,
@@ -66,17 +66,20 @@ func main() {
 		Measurements: measurements,
 	}
 
-	merged := benchagg.MergeWithHistory(history, entry)
+	merged := benchagg.MergeWithHistory(outputData.History, entry)
 	updated := benchagg.PruneHistory(merged, maxHistory)
 	if removed := len(merged) - len(updated); removed > 0 {
 		fmt.Fprintf(os.Stderr, "pruned %d old entries (max-history=%d)\n", removed, maxHistory)
 	}
 
+	outputData.History = updated
+	outputData.Meta = benchagg.MergeMeta(outputData.Meta, meta)
+
 	if err := os.MkdirAll(*pagesDir, 0o755); err != nil {
 		log.Fatalf("mkdirall %s: %v", *pagesDir, err)
 	}
 
-	if err := benchagg.WriteHistory(historyPath, updated); err != nil {
+	if err := benchagg.WriteHistory(historyPath, outputData); err != nil {
 		log.Fatalf("write history: %v", err)
 	}
 	fmt.Fprintf(os.Stderr, "wrote %s (%d entries)\n", historyPath, len(updated))

@@ -30,6 +30,7 @@ type BenchmarkFile struct {
 	Name         string        `json:"name"`
 	Hash         string        `json:"hash"`
 	Timestamp    string        `json:"timestamp"`
+	Meta         Meta          `json:"meta,omitempty"`
 	Measurements []Measurement `json:"measurements"`
 }
 
