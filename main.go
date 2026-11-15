@@ -25,6 +25,8 @@ func main() {
 		"directory to read/write data.json and static site files")
 	maxHistoryStr := flag.String("max-history", envOr("INPUT_MAX_HISTORY", "100"),
 		"maximum number of history entries to keep (0 = unlimited)")
+	jsonFormat := flag.String("json-format", envOr("INPUT_JSON-FORMAT", envOr("INPUT_JSON_FORMAT", "inline")),
+		"output JSON format: inline, pretty, or compact")
 	serve := flag.Bool("serve", false,
 		"serve the static site with data.json over HTTP instead of aggregating")
 	addr := flag.String("addr", ":8080",
@@ -34,6 +36,12 @@ func main() {
 	if *serve {
 		runServe(*pagesDir, *addr)
 		return
+	}
+
+	switch *jsonFormat {
+	case "inline", "pretty", "compact":
+	default:
+		log.Fatalf("invalid json-format %q: expected inline, pretty, or compact", *jsonFormat)
 	}
 
 	maxHistory, err := strconv.Atoi(*maxHistoryStr)
@@ -79,7 +87,7 @@ func main() {
 		log.Fatalf("mkdirall %s: %v", *pagesDir, err)
 	}
 
-	if err := benchagg.WriteHistory(historyPath, outputData); err != nil {
+	if err := benchagg.WriteHistoryWithFormat(historyPath, outputData, *jsonFormat); err != nil {
 		log.Fatalf("write history: %v", err)
 	}
 	fmt.Fprintf(os.Stderr, "wrote %s (%d entries)\n", historyPath, len(updated))

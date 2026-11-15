@@ -23,6 +23,12 @@ inputs:
       everything (no pruning).
     required: false
     default: '100'
+  json-format:
+    description: >
+      Output data.json format: inline (one measurement per line), pretty
+      (fully indented), or compact (no formatting whitespace).
+    required: false
+    default: 'inline'
 
 runs:
   using: 'docker'

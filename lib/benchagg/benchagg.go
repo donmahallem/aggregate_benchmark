@@ -167,10 +167,28 @@ func LoadHistory(path string) (OutputData, error) {
 }
 
 func WriteHistory(path string, data OutputData) error {
-	blob, err := json.MarshalIndent(data, "", "  ")
+	return WriteHistoryWithFormat(path, data, "inline")
+}
+
+// WriteHistoryWithFormat writes history in inline, pretty, or compact JSON format.
+func WriteHistoryWithFormat(path string, data OutputData, format string) error {
+	var blob []byte
+	var err error
+	switch format {
+	case "inline", "pretty":
+		blob, err = json.MarshalIndent(data, "", "  ")
+	case "compact":
+		blob, err = json.Marshal(data)
+	default:
+		return fmt.Errorf("invalid JSON format %q: expected inline, pretty, or compact", format)
+	}
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
+	if format == "inline" {
+		blob = compactMeasurementJSON(blob)
+	}
+
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return fmt.Errorf("mkdirall: %w", err)
 	}
@@ -180,6 +198,77 @@ func WriteHistory(path string, data OutputData) error {
 	return nil
 }
 
+func compactMeasurementJSON(blob []byte) []byte {
+	out := make([]byte, 0, len(blob))
+	inString := false
+	escaped := false
+	inMeasurements := false
+	arrayDepth := 0
+	compactDepth := 0
+
+	for i := 0; i < len(blob); i++ {
+		c := blob[i]
+		if escaped {
+			escaped = false
+			out = append(out, c)
+			continue
+		}
+		if inString && c == '\\' {
+			escaped = true
+			out = append(out, c)
+			continue
+		}
+		if c == '"' {
+			inString = !inString
+			out = append(out, c)
+			continue
+		}
+		if inString {
+			out = append(out, c)
+			continue
+		}
+
+		if c == '[' {
+			if !inMeasurements {
+				idx := len(out) - 1
+				for idx >= 0 && (out[idx] == ' ' || out[idx] == '\t' || out[idx] == '\n' || out[idx] == '\r') {
+					idx--
+				}
+				target := `"measurements":`
+				if idx >= len(target)-1 && string(out[idx-len(target)+1:idx+1]) == target {
+					inMeasurements = true
+					arrayDepth = 1
+				}
+			} else {
+				arrayDepth++
+			}
+		} else if c == ']' && inMeasurements {
+			arrayDepth--
+			if arrayDepth == 0 {
+				inMeasurements = false
+			}
+		}
+
+		if c == '{' && inMeasurements {
+			compactDepth++
+		} else if c == '}' && inMeasurements {
+			compactDepth--
+		}
+
+		if (c == '\n' || c == '\r') && compactDepth > 0 {
+			for i+1 < len(blob) && (blob[i+1] == ' ' || blob[i+1] == '\t' || blob[i+1] == '\r' || blob[i+1] == '\n') {
+				i++
+			}
+			if i+1 < len(blob) && blob[i+1] != '}' {
+				out = append(out, ' ')
+			}
+			continue
+		}
+		out = append(out, c)
+	}
+	return out
+}
+
 func CopyStaticFiles(fsys fs.FS, dir string) error {
 	copied := 0
 	err := fs.WalkDir(fsys, "static", func(path string, d fs.DirEntry, err error) error {
@@ -187,6 +276,9 @@ func CopyStaticFiles(fsys fs.FS, dir string) error {
 			return err
 		}
 		if d.IsDir() {
+			return nil
+		}
+		if path == "static/data.json" {
 			return nil
 		}
 		data, err := fs.ReadFile(fsys, path)

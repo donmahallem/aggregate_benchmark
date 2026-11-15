@@ -1,8 +1,13 @@
 package benchagg_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/donmahallem/aggregate_benchmark/lib/benchagg"
@@ -273,6 +278,102 @@ func TestPruneHistory_DoesNotMutateOriginal(t *testing.T) {
 func TestPruneHistory_Empty(t *testing.T) {
 	if out := benchagg.PruneHistory([]benchagg.HistoryEntry{}, 10); len(out) != 0 {
 		t.Errorf("expected empty, got %d", len(out))
+	}
+}
+
+func TestWriteHistory_Formatting(t *testing.T) {
+	data := benchagg.OutputData{
+		Meta: benchagg.Meta{
+			Series: map[string]benchagg.SeriesMeta{
+				"measurements": {Label: "quoted \"label\""},
+			},
+		},
+		History: []benchagg.HistoryEntry{
+			entry("first", "2024-12-01T10:00:00Z", []benchagg.Measurement{
+				{SeriesKey: "go", GroupKey: "bench", Duration: "1ms", Iterations: 10, Description: "quote \" slash \\ newline\n"},
+				meas("python", "bench", "2ms"),
+			}),
+			entry("empty", "2024-12-02T10:00:00Z", []benchagg.Measurement{}),
+			entry("nil", "2024-12-03T10:00:00Z", nil),
+		},
+	}
+	for _, tc := range []struct {
+		name   string
+		format string
+		write  func(string, benchagg.OutputData) error
+	}{
+		{"default", "inline", benchagg.WriteHistory},
+		{"inline", "inline", func(path string, data benchagg.OutputData) error {
+			return benchagg.WriteHistoryWithFormat(path, data, "inline")
+		}},
+		{"pretty", "pretty", func(path string, data benchagg.OutputData) error {
+			return benchagg.WriteHistoryWithFormat(path, data, "pretty")
+		}},
+		{"compact", "compact", func(path string, data benchagg.OutputData) error {
+			return benchagg.WriteHistoryWithFormat(path, data, "compact")
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "nested", "data.json")
+			if err := tc.write(path, data); err != nil {
+				t.Fatal(err)
+			}
+			blob, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got benchagg.OutputData
+			if err := json.Unmarshal(blob, &got); err != nil {
+				t.Fatalf("invalid JSON: %v", err)
+			}
+			if !reflect.DeepEqual(got, data) {
+				t.Fatalf("round trip changed data:\ngot:  %#v\nwant: %#v", got, data)
+			}
+			var want []byte
+			switch tc.format {
+			case "pretty":
+				want, err = json.MarshalIndent(data, "", "  ")
+			case "compact":
+				want, err = json.Marshal(data)
+			case "inline":
+				for _, line := range []string{
+					`        { "series_key": "go", "group_key": "bench", "duration": "1ms", "iterations": 10, "description": "quote \" slash \\ newline\n"},`,
+					`        { "series_key": "python", "group_key": "bench", "duration": "2ms"}`,
+					`      "measurements": []`,
+					`      "measurements": null`,
+				} {
+					if !strings.Contains(string(blob), line+"\n") {
+						t.Errorf("output missing line %q", line)
+					}
+				}
+				if !bytes.Contains(blob, []byte("  \"meta\": {\n")) || !bytes.Contains(blob, []byte("  \"history\": [\n")) {
+					t.Error("metadata and history should remain indented")
+				}
+				pretty, marshalErr := json.MarshalIndent(data, "", "  ")
+				if marshalErr != nil {
+					t.Fatal(marshalErr)
+				}
+				if len(blob) >= len(pretty) {
+					t.Errorf("inline output is not smaller than pretty output: %d >= %d", len(blob), len(pretty))
+				}
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if want != nil && !bytes.Equal(blob, want) {
+				t.Errorf("unexpected JSON formatting:\ngot: %s\nwant: %s", blob, want)
+			}
+		})
+	}
+}
+
+func TestWriteHistoryWithFormat_Invalid(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "data.json")
+	if err := benchagg.WriteHistoryWithFormat(path, benchagg.OutputData{}, "unknown"); err == nil {
+		t.Fatal("expected invalid format error")
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("invalid format should not create a file: %v", err)
 	}
 }
 
